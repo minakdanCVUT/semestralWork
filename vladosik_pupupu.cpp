@@ -15,12 +15,21 @@ typedef struct TCriminal
 
 #endif /* __PROGTEST__ */
 
+void initTCRIMINAL(TCRIMINAL * criminal){
+    criminal->m_Next = nullptr;
+    criminal->m_Name = nullptr;
+    criminal->m_Cnt = 0;
+    criminal->m_Contacts = nullptr;
+    criminal->m_Capacity = 0;
+}
+
 TCRIMINAL *createRecord(const char *name, TCRIMINAL *next) {
     TCRIMINAL *tmp = (TCRIMINAL *)malloc(sizeof(TCRIMINAL));
-    size_t lengthName = strlen(name);
-    tmp->m_Name = (char *)malloc((lengthName + 1) * sizeof(char));
+    initTCRIMINAL(tmp);
+    size_t lengthName = strlen(name)+1;
+    tmp->m_Name = (char *)malloc((lengthName) * sizeof(char));
     strncpy(tmp->m_Name, name, lengthName);
-    tmp->m_Next = next; // Устанавливаем следующий элемент
+    tmp->m_Next = next;
     tmp->m_Cnt = 0;
     tmp->m_Capacity = 10;
     tmp->m_Contacts = (TCRIMINAL **)malloc(tmp->m_Capacity * sizeof(TCRIMINAL *));
@@ -33,7 +42,7 @@ void addContact(TCRIMINAL *dst, TCRIMINAL *contact) {
     dst->m_Contacts[dst->m_Cnt] = contact;
     if(dst->m_Cnt + 1 == dst->m_Capacity) {
         dst->m_Capacity *= 2;
-        dst->m_Contacts = (TCRIMINAL **) realloc(dst->m_Contacts, dst->m_Capacity * sizeof(TCRIMINAL *));
+        dst->m_Contacts = (TCRIMINAL **)realloc(dst->m_Contacts, dst->m_Capacity * sizeof(TCRIMINAL *));
     }
     ++dst->m_Cnt;
 }
@@ -45,6 +54,7 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
             break;
         }else{
             TCRIMINAL * tmp = (TCRIMINAL*)malloc(sizeof(TCRIMINAL));
+            initTCRIMINAL(tmp);
             size_t str_length = strlen(tmp_node->m_Name);
             tmp->m_Name = (char*)malloc((str_length + 1) * sizeof(char));
             strncpy(tmp->m_Name, tmp_node->m_Name, str_length);
@@ -59,8 +69,6 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
             tmp_node = tmp_node->m_Next;
         }
     }
-    /*
-     * если у контакта из старого листа из которого клонируем и у узла в новый наклонированном листе совпадают имена, то вызываем функцию addContact()*/
     tmp_node = node;
     TCRIMINAL * tmp_new_node = head;
     while(true){
@@ -69,7 +77,7 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
         }
         tmp_new_node->m_Contacts = (TCRIMINAL**)malloc(tmp_new_node->m_Capacity * sizeof(TCRIMINAL*));
         if(tmp_node->m_Cnt != 0){
-            for(int i = 0; i < tmp_node->m_Cnt; ++i){
+            for(size_t i = 0; i < tmp_node->m_Cnt; ++i){
                 TCRIMINAL * iterator_new_list = head;
                 while(true){
                     if(strcmp(tmp_node->m_Contacts[i]->m_Name, iterator_new_list->m_Name)){
@@ -91,9 +99,20 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
 
 
 void freeList(TCRIMINAL *src) {
+    while (src != NULL) {
+        TCRIMINAL *current = src;
+        src = src->m_Next;
 
+        // Free contacts array
+        free(current->m_Contacts);
+
+        // Free name string
+        free(current->m_Name);
+
+        // Free current node
+        free(current);
+    }
 }
-
 #ifndef __PROGTEST__
 int main ( int argc, char * argv [] )
 {
