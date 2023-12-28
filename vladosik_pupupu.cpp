@@ -23,12 +23,40 @@ void initTCRIMINAL(TCRIMINAL * criminal){
     criminal->m_Capacity = 0;
 }
 
+void SELF_MADE_STRNCPY(char * destination, const char * source, size_t * destination_capacity){
+    size_t counter_for_destination = 0, source_len = strlen(source) + 1;
+    for(size_t i = 0; i < source_len; ++i){
+        destination[i] = source[i];
+        if(counter_for_destination + 1 == *destination_capacity) {
+            *destination_capacity *= 2;
+            destination = (char *) realloc(destination, *destination_capacity * sizeof(char));
+        }
+        ++counter_for_destination;
+    }
+}
+
+bool SELF_MADE_STRCMP(const char * string_1, const char * string_2){
+
+    size_t len_string_1 = strlen(string_1);
+    size_t len_string_2 = strlen(string_2);
+    if(len_string_1 != len_string_2){
+        return false;
+    }else{
+        for(size_t i = 0; i < len_string_1; ++i){
+            if(string_1[i] != string_2[i]){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 TCRIMINAL *createRecord(const char *name, TCRIMINAL *next) {
     TCRIMINAL *tmp = (TCRIMINAL *)malloc(sizeof(TCRIMINAL));
     initTCRIMINAL(tmp);
-    size_t lengthName = strlen(name)+1;
-    tmp->m_Name = (char *)malloc((lengthName) * sizeof(char));
-    strncpy(tmp->m_Name, name, lengthName);
+    size_t tmp_name = 10;
+    tmp->m_Name = (char *)malloc((tmp_name) * sizeof(char));
+    SELF_MADE_STRNCPY(tmp->m_Name, name, &tmp_name);
     tmp->m_Next = next;
     tmp->m_Cnt = 0;
     tmp->m_Capacity = 10;
@@ -55,9 +83,9 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
         }else{
             TCRIMINAL * tmp = (TCRIMINAL*)malloc(sizeof(TCRIMINAL));
             initTCRIMINAL(tmp);
-            size_t str_length = strlen(tmp_node->m_Name);
-            tmp->m_Name = (char*)malloc((str_length + 1) * sizeof(char));
-            strncpy(tmp->m_Name, tmp_node->m_Name, str_length);
+            size_t tmp_name = 10;
+            tmp->m_Name = (char*)malloc((tmp_name) * sizeof(char));
+            SELF_MADE_STRNCPY(tmp->m_Name, tmp_node->m_Name, &tmp_name);
             tmp->m_Capacity = node->m_Capacity;
 
             if(tail == nullptr){
@@ -80,7 +108,7 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
             for(size_t i = 0; i < tmp_node->m_Cnt; ++i){
                 TCRIMINAL * iterator_new_list = head;
                 while(true){
-                    if(strcmp(tmp_node->m_Contacts[i]->m_Name, iterator_new_list->m_Name)){
+                    if(!SELF_MADE_STRCMP(tmp_node->m_Contacts[i]->m_Name, iterator_new_list->m_Name)){
                         iterator_new_list = iterator_new_list->m_Next;
                     }else{
                         addContact(tmp_new_node, iterator_new_list);
