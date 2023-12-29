@@ -34,13 +34,13 @@ void initPairOfCriminals(PairOfCriminals * pair){
     pair->original_crime = nullptr;
 }
 
-void SELF_MADE_STRNCPY(char * destination, const char * source, size_t * destination_capacity){
+void SELF_MADE_STRNCPY(char ** destination, const char * source, size_t * destination_capacity){
     size_t counter_for_destination = 0, source_len = strlen(source) + 1;
     for(size_t i = 0; i < source_len; ++i){
-        destination[i] = source[i];
+        (*destination)[i] = source[i];
         if(counter_for_destination + 1 == *destination_capacity) {
             *destination_capacity *= 2;
-            destination = (char *)realloc(destination, *destination_capacity * sizeof(char));
+            *destination = (char *)realloc(*destination, *destination_capacity * sizeof(char));
         }
         ++counter_for_destination;
     }
@@ -55,7 +55,7 @@ TCRIMINAL *createRecord(const char *name, TCRIMINAL *next) {
     initTCRIMINAL(tmp);
     size_t tmp_name = 10;
     tmp->m_Name = (char *) malloc((tmp_name) * sizeof(char));
-    SELF_MADE_STRNCPY(tmp->m_Name, name, &tmp_name);
+    SELF_MADE_STRNCPY(&tmp->m_Name, name, &tmp_name);
     tmp->m_Next = next;
     tmp->m_Cnt = 0;
     tmp->m_Capacity = 10;
@@ -90,7 +90,7 @@ TCRIMINAL * cloneList(TCRIMINAL *node){
             initTCRIMINAL(clone_criminal);
             size_t tmp_name = 10;
             clone_criminal->m_Name = (char*)malloc((tmp_name) * sizeof(char));
-            SELF_MADE_STRNCPY(clone_criminal->m_Name, tmp_node->m_Name, &tmp_name);
+            SELF_MADE_STRNCPY(&clone_criminal->m_Name, tmp_node->m_Name, &tmp_name);
             clone_criminal->m_Capacity = node->m_Capacity;
 
             if(tail == nullptr){
@@ -119,7 +119,7 @@ TCRIMINAL * cloneList(TCRIMINAL *node){
             tmp_new_node->m_Contacts = (TCRIMINAL**)malloc(tmp_new_node->m_Capacity * sizeof(TCRIMINAL*));
             if(tmp_node->m_Cnt != 0){
                 for(size_t i = 0; i < tmp_node->m_Cnt; ++i){
-                    int iterator = 0;
+                    size_t iterator = 0;
                     while(true){
                         if(pairs[iterator].original_crime == tmp_node->m_Contacts[i]){
                             addContact(tmp_new_node, pairs[iterator].clone_crime);
