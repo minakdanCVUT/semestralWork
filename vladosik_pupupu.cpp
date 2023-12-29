@@ -48,25 +48,24 @@ void SELF_MADE_STRNCPY(char * destination, const char * source, size_t * destina
 
 
 TCRIMINAL *createRecord(const char *name, TCRIMINAL *next) {
-    if(name == nullptr || next == nullptr){
+    if(name == nullptr){
         return next;
     }
-    TCRIMINAL *tmp = (TCRIMINAL *)malloc(sizeof(TCRIMINAL));
+    TCRIMINAL *tmp = (TCRIMINAL *) malloc(sizeof(TCRIMINAL));
     initTCRIMINAL(tmp);
     size_t tmp_name = 10;
-    tmp->m_Name = (char *)malloc((tmp_name) * sizeof(char));
+    tmp->m_Name = (char *) malloc((tmp_name) * sizeof(char));
     SELF_MADE_STRNCPY(tmp->m_Name, name, &tmp_name);
     tmp->m_Next = next;
     tmp->m_Cnt = 0;
     tmp->m_Capacity = 10;
-    tmp->m_Contacts = (TCRIMINAL **)malloc(tmp->m_Capacity * sizeof(TCRIMINAL *));
-
+    tmp->m_Contacts = (TCRIMINAL **) malloc(tmp->m_Capacity * sizeof(TCRIMINAL *));
     return tmp;
 }
 
 
 void addContact(TCRIMINAL *dst, TCRIMINAL *contact) {
-    if(!dst || !contact){
+    if(dst == nullptr || contact == nullptr){
         return;
     }
     dst->m_Contacts[dst->m_Cnt] = contact;
