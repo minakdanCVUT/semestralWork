@@ -15,12 +15,23 @@ typedef struct TCriminal
 
 #endif /* __PROGTEST__ */
 
+typedef struct PairOfCriminals{
+    TCRIMINAL * original_crime;
+    TCRIMINAL * clone_crime;
+}PairOfCriminals;
+
+
 void initTCRIMINAL(TCRIMINAL * criminal){
     criminal->m_Next = nullptr;
     criminal->m_Name = nullptr;
     criminal->m_Cnt = 0;
     criminal->m_Contacts = nullptr;
     criminal->m_Capacity = 0;
+}
+
+void initPairOfCriminals(PairOfCriminals * pair){
+    pair->clone_crime = nullptr;
+    pair->original_crime = nullptr;
 }
 
 void SELF_MADE_STRNCPY(char * destination, const char * source, size_t * destination_capacity){
@@ -78,25 +89,36 @@ void addContact(TCRIMINAL *dst, TCRIMINAL *contact) {
     ++dst->m_Cnt;
 }
 
-TCRIMINAL *cloneList(TCRIMINAL *node){
-    TCRIMINAL *head = nullptr, * tmp_node = node, * tail = nullptr;
+
+TCRIMINAL * cloneList(TCRIMINAL *node){
+    TCRIMINAL * head = nullptr, * tmp_node = node, * tail = nullptr;
+    size_t size_for_pairs = 10;
+    PairOfCriminals * pairs = (PairOfCriminals*)malloc(size_for_pairs * sizeof(PairOfCriminals));
+    size_t counter_for_pairs = 0;
     while(true){
         if(tmp_node == nullptr){
             break;
         }else{
-            TCRIMINAL * tmp = (TCRIMINAL*)malloc(sizeof(TCRIMINAL));
-            initTCRIMINAL(tmp);
+            TCRIMINAL * clone_criminal = (TCRIMINAL*)malloc(sizeof(TCRIMINAL));
+            initTCRIMINAL(clone_criminal);
             size_t tmp_name = 10;
-            tmp->m_Name = (char*)malloc((tmp_name) * sizeof(char));
-            SELF_MADE_STRNCPY(tmp->m_Name, tmp_node->m_Name, &tmp_name);
-            tmp->m_Capacity = node->m_Capacity;
+            clone_criminal->m_Name = (char*)malloc((tmp_name) * sizeof(char));
+            SELF_MADE_STRNCPY(clone_criminal->m_Name, tmp_node->m_Name, &tmp_name);
+            clone_criminal->m_Capacity = node->m_Capacity;
 
             if(tail == nullptr){
-                head = tmp;
+                head = clone_criminal;
             }else{
-                tail->m_Next = tmp;
+                tail->m_Next = clone_criminal;
             }
-            tail = tmp;
+            tail = clone_criminal;
+            pairs[counter_for_pairs].original_crime = tmp_node;
+            pairs[counter_for_pairs].clone_crime = clone_criminal;
+            if(counter_for_pairs + 1 == size_for_pairs){
+                size_for_pairs *= 2;
+                pairs = (PairOfCriminals*)realloc(pairs, size_for_pairs * sizeof(PairOfCriminals));
+            }
+            ++counter_for_pairs;
             tmp_node = tmp_node->m_Next;
         }
     }
@@ -105,17 +127,21 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
     while(true){
         if(tmp_node == nullptr){
             break;
-        }
-        tmp_new_node->m_Contacts = (TCRIMINAL**)malloc(tmp_new_node->m_Capacity * sizeof(TCRIMINAL*));
-        if(tmp_node->m_Cnt != 0){
-            for(size_t i = 0; i < tmp_node->m_Cnt; ++i){
-                TCRIMINAL * iterator_new_list = head;
-                while(true){
-                    if(!SELF_MADE_STRCMP(tmp_node->m_Contacts[i]->m_Name, iterator_new_list->m_Name)){
-                        iterator_new_list = iterator_new_list->m_Next;
-                    }else{
-                        addContact(tmp_new_node, iterator_new_list);
-                        break;
+        }else{
+            tmp_new_node->m_Contacts = (TCRIMINAL**)malloc(tmp_new_node->m_Capacity * sizeof(TCRIMINAL*));
+            if(tmp_node->m_Cnt != 0){
+                for(size_t i = 0; i < tmp_node->m_Cnt; ++i){
+                    int iterator = 0;
+                    while(true){
+                        if(pairs[iterator].original_crime == tmp_node->m_Contacts[i]){
+                            addContact(tmp_new_node, pairs[iterator].clone_crime);
+                            break;
+                        }else{
+                            ++iterator;
+                        }
+                        if(iterator > counter_for_pairs){
+                            break;
+                        }
                     }
                 }
             }
@@ -123,10 +149,9 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
         tmp_node = tmp_node->m_Next;
         tmp_new_node = tmp_new_node->m_Next;
     }
+    free(pairs);
     return head;
 }
-
-
 
 
 void freeList(TCRIMINAL *src) {
@@ -175,7 +200,7 @@ int main ( int argc, char * argv [] )
              && a -> m_Next -> m_Next -> m_Next -> m_Cnt == 1
              && a -> m_Next -> m_Next -> m_Next -> m_Contacts[0] == a -> m_Next );
     assert ( a -> m_Next -> m_Next -> m_Next -> m_Next == nullptr );
-    b = cloneList ( a );
+    b = cloneList( a );
     strcpy ( tmp, "Moe" );
     a = createRecord ( tmp, a );
     strcpy ( tmp, "Victoria" );
