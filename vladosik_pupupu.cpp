@@ -29,7 +29,7 @@ void SELF_MADE_STRNCPY(char * destination, const char * source, size_t * destina
         destination[i] = source[i];
         if(counter_for_destination + 1 == *destination_capacity) {
             *destination_capacity *= 2;
-            destination = (char *) realloc(destination, *destination_capacity * sizeof(char));
+            destination = (char *)realloc(destination, *destination_capacity * sizeof(char));
         }
         ++counter_for_destination;
     }
@@ -52,6 +52,9 @@ bool SELF_MADE_STRCMP(const char * string_1, const char * string_2){
 }
 
 TCRIMINAL *createRecord(const char *name, TCRIMINAL *next) {
+    if(name == nullptr){
+        return next;
+    }
     TCRIMINAL *tmp = (TCRIMINAL *)malloc(sizeof(TCRIMINAL));
     initTCRIMINAL(tmp);
     size_t tmp_name = 10;
@@ -127,7 +130,10 @@ TCRIMINAL *cloneList(TCRIMINAL *node){
 
 
 void freeList(TCRIMINAL *src) {
-    while (src != NULL) {
+    if(src == nullptr){
+        return;
+    }
+    while (src != nullptr) {
         TCRIMINAL *current = src;
         src = src->m_Next;
 
